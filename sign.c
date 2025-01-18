@@ -57,6 +57,7 @@ void sign_in(FILE *fp, int *result, char nametmp[]) {
         }
     }
     //اگر که بولین ما برابر غلط بود بیا و یه خظا پرینت کن
+    //
 }
 
 int filegame(FILE *fgame, char name[])
