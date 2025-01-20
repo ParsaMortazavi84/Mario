@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<conio.h>
 
 struct sign {
     char name[100];
@@ -20,40 +21,117 @@ struct infogame{
     struct game *pHead;
 };
 
-void sign_up(FILE *fp) {
+void sign_up(FILE *fp) {                            //number 1
     struct sign *temp = (struct sign*)malloc(sizeof(struct sign));
-    printf("Enter your name: ");
-    scanf("%s", temp->name);
+    int result = 0;
+    while(result != 1){
+        printf("Enter your name: ");
+        scanf("%s", temp->name);
+        struct sign temp2;
+        fseek(fp, 0, SEEK_SET);
+
+        while(fread(&temp2, sizeof(struct sign), 1, fp) == 1)
+        {
+            if(strcmp(temp2.name, temp->name) == 0)
+            {
+                printf("This name is already exist\n");
+                result = 0;
+                break;
+            }
+            else{
+                result = 1;
+            }
+        }
+    }
     printf("Enter your gmail: ");
     scanf("%s", temp->gmail);
     printf("Enter your password: ");
     scanf("%s", temp->password);
+    result = 0;
+    while(result != 1){                       //agian enter your password
+        printf("Enter your password again: ");
+        char password[100];
+        scanf("%s", password);
+        if(strcmp(password, temp->password) == 0)
+        {
+            result = 1;
+        }
+        else{
+            printf("The password is not correct\n");
+        }
+    }
     fseek(fp, 0, SEEK_END);
-    int n = ftell(fp);
-    fseek(fp, n, SEEK_SET); 
     fwrite(temp, sizeof(struct sign), 1, fp);
 }
-void sign_in(FILE *fp, int *result, char nametmp[]) {
+
+forgetpassword(FILE *fp)
+{
     struct sign temp, temp2;
-    printf("Enter your name: ");//رنگی کردن
+    printf("Enter your name: ");
+    scanf("%s", temp.name);
+    printf("Enter your gmail: ");
+    scanf("%s", temp.gmail);
+    fseek(fp, 0, SEEK_SET);
+    while(fread(&temp2, sizeof(struct sign), 1, fp) == 1)
+    {
+        if(strcmp(temp2.name, temp.name) == 0)
+        {
+            if(strcmp(temp2.gmail, temp.gmail) == 0)
+            {
+                printf("Enter your new password: ");
+                scanf("%s", temp2.password);
+                fseek(fp, -sizeof(struct sign), SEEK_CUR);
+                fwrite(&temp2, sizeof(struct sign), 1, fp);
+            }
+            else{
+                printf("The gmail is not correct\n");
+            }
+        }
+        else{
+            printf("The name is not correct\n");
+        }
+    }
+}
+void sign_in(FILE *fp, int result, char nametmp[]) {
+    struct sign temp, temp2;
+    printf("Enter your name: ");//رنگی کردن را یادت نره
     scanf("%s", temp.name);
     printf("Enter your password: ");
-    scanf("%s", temp.password);
+    int i = 0;
+    char ch; 
+    while (1) {
+        ch = getch();  // بدون نشان دادن بر روی ص
+
+        if (ch == 13) {  // کد اسبلی انتر است
+            break;
+        } 
+        
+        else {                                          // ذخیره کاراکتر در آرایه
+            temp.password[i++] = ch;
+            printf("*");                               // نمایش ستاره به‌جای رمز
+        }
+    }
+
+    temp.password[i] = '\0';  // اخر رشته را زیرو بایت می کند 
+    printf("\n");
     fseek(fp, 0, SEEK_SET);
     while(fread(&temp2, sizeof(struct sign), 1, fp) == 1 )
     {
         if(strcmp(temp2.name, temp.name) == 0)
         {
-            if(temp2.password == temp.password)
+            if(strcmp(temp2.password , temp.password) == 0)
             {
                 strcpy(nametmp, temp.name);//بعدش در یک فایل دگر به نام گیم میام و این نام را می گردیم پیدا شد می کنیم تا رکوردهاش را جلوش ثبت کنیم
             }
             else{
                 result = 0;
+                printf("        ")
+                forgetpassword(fp);
             }
         }
         else{
             result = 0;
+            forgetpassword(fp);
         }
     }
     //اگر که بولین ما برابر غلط بود بیا و یه خظا پرینت کن
@@ -84,36 +162,37 @@ int filegame(FILE *fgame, char name[])
     }
 }
 
-void showinfogame(char name[], FILE *fgame)
-{
+void showinfogame(char name[], FILE *fgame) {
     struct infogame temp;
-    struct game *pTmp;
-    while(fread(&temp, sizeof(struct infogame), 1, fgame) == 1)
-    {
-        if(strcmp(temp.name, name) == 0)
-        {
-            pTmp = temp.pHead;
-            if(pTmp == NULL)
-            {
-                printf("you haven't history of this game");
+
+    while (fread(&temp, sizeof(struct infogame), 1, fgame) == 1) {
+        if (strcmp(temp.name, name) == 0) {
+            struct game *pTmp = temp.pHead;
+            
+            if (pTmp == NULL) {
+                printf("You haven't history of this game.\n");
+                return;
             } 
-            else{
-                int i = 0;//کشیدن جدول
-                
-                while(pTmp != NULL)//قراره مقادیر داخل جدول را اینجا وارد کنم
-                {
-                    if(i==0)
-                    {
-                        printf("game\tvictory\tloss\tscore\tcoin\n");
-                        continue;
-                    }
-                    printf("game %d", i);
-                    printf("%d\t%d\t%d\t%d\n", i, pTmp->victory, pTmp->loss, pTmp->score, pTmp->coin); 
-                    pTmp = pTmp->pNext;
-                    i++;
-                }
+
+            //  کشیدن خط بالا
+            printf("+--------+---------+-------+------+\n");
+            printf("| %-6s | %-7s | %-5s | %-4s |\n", "Game", "Victory", "Score", "Coin");//چپ چین کردن عناوین با علامت منفی اینگونه فضای خالی را در سمت راست قرار می دهد
+            printf("+--------+---------+-------+------+\n");
+
+            int i = 1;
+            while (pTmp != NULL) {
+                printf("| %-6d | %-7d | %-5d | %-4d |\n", i, pTmp->victory, pTmp->score, pTmp->coin);
+                pTmp = pTmp->pNext;
+                i++;
             }
+
+            //  کشیدن خط پایین جدول
+            printf("+--------+---------+-------+------+\n");
+
+            return;  
         }
     }
+
+    printf("Game not found!\n"); 
 }
 
