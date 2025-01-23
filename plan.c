@@ -1,23 +1,14 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<conio.h>
-#include<windows.h>
-//map1
-//culmn 128
-//row 14
-//for the block indestructible #
-// for the block destructible  %
-// for block coin 8
-// for block  gharch &
-//for coin $
-// for wide flower @
-// for spout |
-// for normal enemy ( or ) that was depends on what's it's direction
-// the invicible enemy   D
-
-// for the flag {
-// mario M
+#include <stdio.h>
+#include <windows.h>
+#include <conio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include<time.h>
+#include <string.h>
+#include <pthread.h>
+int coin = 0;
+COORD coord;
+char valuecoin[14][130];
 void map1(FILE *mp1)
 {
     char map1[14][130], temp[130];
@@ -27,44 +18,43 @@ void map1(FILE *mp1)
         i++;
         //fseek(mp1, 1, SEEK_CUR);
     }
-    for(i = 0; i < 14; i++)
-        printf("%s", map1[i]);
+    for(int i = 0; i < 14; i++)
+    {
+        for(int j = 0; j < 130; j++)
+        {
+            if(map1[i][j] == '8')
+            {
+                srand(time(0));
+                valuecoin[i][j] = (rand() % 5) + 1;
+            }
+            else{
+                valuecoin[i][j] = 0;
+            }
+        }
+    }
+    for(i = 0; i < 14; i++){
+        for(int j = 0; j < 130; j++)
+        {
+            if(map1[i][j] == '#')
+            {
+                printf("\xF0\x9F\xA7\xB1");  // UTF-8 encoded bytes for 🧱
+            }
+            else if(map1[i][j] == '|')
+            {
+                printf("\xF0\x9F\x8C\xB5");  // UTF-8 encoded bytes for 🌵
+            }
+            else if(map1[i][j] == '8')
+            {
+                printf("\xF0\x9F\x92\xB0");  // UTF-8 encoded bytes for 💰
+            }
+            else{
+                printf("%c", map1[i][j]);
+            }
+        }
+    }   
+
+    fclose(mp1);    
     //move
 
     
-}
-void setcursorposition(SHORT x, SHORT y)
-{
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD pos = {x, y};
-    SetConsoleCursorPosition(hConsole, pos);
-}
-void whathappen(FILE *map, SHORT  x, SHORT y)
-{
-    
-}
-
-int main ()
-{
-    FILE *mp1 = fopen("map1.txt", "r+");
-    map1(mp1);
-
-    COORD player = {2, 13};
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), player);
-    int x = 0, y = 0;
-    char ch;
-    while(kbhit())
-    {
-        ch = getch();
-        if(ch == "a" || ch == "A")
-            player.X--;
-        else if(ch == "d" || ch == "D")
-            player.X++;
-        else if(ch == "s" || ch == "S")
-            player.Y++;        
-        else if(ch == " ")
-            whathappen(map1, player.X, player.Y);    
-
-    }    
-    return 0;
 }

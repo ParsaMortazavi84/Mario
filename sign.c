@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<conio.h>
+#include"sign.h"
 
 struct sign {
     char name[100];
@@ -64,7 +65,7 @@ void sign_up(FILE *fp) {                            //number 1
     fwrite(temp, sizeof(struct sign), 1, fp);
 }
 
-forgetpassword(FILE *fp)
+void forgetpassword(FILE *fp)
 {
     struct sign temp, temp2;
     printf("Enter your name: ");
@@ -92,7 +93,7 @@ forgetpassword(FILE *fp)
         }
     }
 }
-void sign_in(FILE *fp, int result, char nametmp[]) {
+void sign_in(FILE *fp, int result, char *nametmp) {
     struct sign temp, temp2;
     printf("Enter your name: ");//رنگی کردن را یادت نره
     scanf("%s", temp.name);
@@ -125,7 +126,7 @@ void sign_in(FILE *fp, int result, char nametmp[]) {
             }
             else{
                 result = 0;
-                printf("        ")
+                printf("");
                 forgetpassword(fp);
             }
         }
@@ -195,4 +196,75 @@ void showinfogame(char name[], FILE *fgame) {
 
     printf("Game not found!\n"); 
 }
+void change_Data(FILE *fp)
+{
+    struct sign temp, temp2, temp3;
+    printf("Enter your name: ");
+    scanf("%s", temp.name);
+    printf("Enter your password: ");
+    scanf("%s", temp.password);
+    fseek(fp, 0, SEEK_SET);
+    int resultn = 0;// if not find the name
+    int result = fread(&temp2, sizeof(struct sign), 1, fp);
+    while(result == 1)
+    {
+        if(strcmp(temp2.name, temp.name) == 0)
+        {
+            resultn = 1;
+            if(strcmp(temp2.password, temp.password) == 0)
+            {
+                printf("Enter your new name: ");
+                scanf("%s", temp2.name);
+                fseek(fp, 0, SEEK_SET);
 
+                while(fread(&temp2, sizeof(struct sign), 1, fp) == 1)
+                {
+                    if(strcmp(temp2.name, temp3.name) == 0)
+                    {
+                        printf("This name is already exist\n");
+                        printf("Enter your new name: ");
+                        scanf("%s", temp2.name);
+                        fseek(fp, 0, SEEK_SET);
+                    }
+
+                }
+            }   
+            else{
+                printf("the password is not correct\n");
+                printf("Enter your password again: ");
+                scanf("%s", temp.password);
+                continue;
+            }    
+            printf("Enter your new password: ");
+            scanf("%s", temp2.password);
+                
+            int result3 = 0;
+        while(result3 != 1){                       //agian enter your password
+            printf("Enter your password again: ");
+            char password[100];
+            scanf("%s", password);
+            if(strcmp(temp2.password, password) == 0)
+            {
+                result = 1;
+            }
+        else{
+            printf("The password is not correct\n");
+        }
+    }
+        fseek(fp, -sizeof(struct sign), SEEK_CUR);
+        fwrite(&temp2, sizeof(struct sign), 1, fp);
+        break;
+    }
+        
+        else{
+            result = fread(&temp2, sizeof(struct sign), 1, fp);
+        }    
+    }
+    
+    if(resultn == 0)
+    {
+        printf("The name is not correct\n");
+        return;
+    }
+    return;
+}    
