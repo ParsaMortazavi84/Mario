@@ -1,112 +1,177 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<conio.h>
-#include"sign.h"
+#include "common.h"
 
-struct sign {
-    char name[100];
-    char gmail[200];
-    char password[100];
-};
+extern char Name[100] = {};
+int resultultimate = 0;
 
-struct game{
-    int victory;
-    int loss;
-    int score;
-    int coin;
-    struct game *pNext;
-};
-struct infogame{
-    char name[100];
-    struct game *pHead;
-};
-
-void sign_up(FILE *fp) {                            //number 1
+void sign_up(FILE *fp, FILE *fgame) {                            //number 1
     struct sign *temp = (struct sign*)malloc(sizeof(struct sign));
+    struct infogame *tmp = (struct infogame*)malloc(sizeof(struct infogame)), tmp2;
     int result = 0;
     while(result != 1){
+        system("cls");
+        printf("\033[32m");
         printf("Enter your name: ");
-        scanf("%s", temp->name);
+        printf("\033[0m");
+        fgets(temp->name, sizeof(temp->name), stdin);
+        temp->name[strcspn(temp->name, "\n")] = '\0';
+
         struct sign temp2;
         fseek(fp, 0, SEEK_SET);
-
+        fseek(fgame, 0, SEEK_SET);
+        result = 2;
+        fread(&tmp2, sizeof(struct infogame), 1, fgame);
         while(fread(&temp2, sizeof(struct sign), 1, fp) == 1)
         {
             if(strcmp(temp2.name, temp->name) == 0)
             {
+                printf("\033[31m");
                 printf("This name is already exist\n");
                 result = 0;
+                Sleep(800);
+                system("cls");
                 break;
             }
-            else{
-                result = 1;
-            }
+            fread(&tmp2, sizeof(struct infogame), 1, fgame);
+        }
+        if(result == 2)
+        {
+            result = 1;
+            break;
         }
     }
+    printf("\033[32m");
     printf("Enter your gmail: ");
+    printf("\033[0m");
     scanf("%s", temp->gmail);
-    printf("Enter your password: ");
+    getc(stdin);//for inter the gmail
+    printf("\033[32m");
+    printf("\nEnter your password: ");
+    printf("\033[0m");
     scanf("%s", temp->password);
+    getc(stdin);
     result = 0;
     while(result != 1){                       //agian enter your password
+        printf("\033[32m");
         printf("Enter your password again: ");
         char password[100];
-        scanf("%s", password);
+        printf("\033[0m");
+        fgets(password, sizeof(password), stdin);
+    
+        password[strcspn(password, "\n")] = '\0'; // حذف `\n`
+        
         if(strcmp(password, temp->password) == 0)
         {
             result = 1;
+            strcpy(tmp->name , temp->name);
+            
         }
         else{
-            printf("The password is not correct\n");
+            printf("\033[31m");
+            printf("The password is not correct\n");// یادت نره قرمزش کنی
+            Sleep(200);
         }
     }
     fseek(fp, 0, SEEK_END);
     fwrite(temp, sizeof(struct sign), 1, fp);
+
+    fseek(fgame, 0, SEEK_END);
+    fwrite(tmp, sizeof(struct infogame), 1, fgame);
+
+
+    strcpy(Name, temp->name);
+    free(temp);
+    
 }
 
-void forgetpassword(FILE *fp)
+void forgetpassword(FILE *fp, int *result)
 {
     struct sign temp, temp2;
+    printf("\033[32m");
     printf("Enter your name: ");
-    scanf("%s", temp.name);
+    printf("\033[0m");
+    fgets(temp.name, sizeof(temp.name), stdin);
+    temp.name[strcspn(temp.name, "\n")] = '\0';
+    printf("\033[32m");
     printf("Enter your gmail: ");
+    printf("\033[0m");
     scanf("%s", temp.gmail);
+    getc(stdin);
     fseek(fp, 0, SEEK_SET);
+    int resultn = 0;// that's for name
     while(fread(&temp2, sizeof(struct sign), 1, fp) == 1)
     {
         if(strcmp(temp2.name, temp.name) == 0)
         {
+            resultn = 1;
             if(strcmp(temp2.gmail, temp.gmail) == 0)
             {
+                printf("\033[32m");
                 printf("Enter your new password: ");
+                printf("\033[0m");
                 scanf("%s", temp2.password);
-                fseek(fp, -sizeof(struct sign), SEEK_CUR);
+                int result1 = 0;
+                while(result1 != 1){   
+                    printf("\033[32m");                    //agian enter your password
+                    printf("Enter your password again: ");
+                    char password[100];
+                    printf("\033[0m");
+                    scanf("%s", password);
+                    getc(stdin);
+                    if(strcmp(password, temp2.password) == 0)
+                    {
+                        result1 = 1;
+                    }
+                    else{
+                        printf("\033[31m");
+                        printf("The password is not correct\n");
+                        Sleep(2000);
+                    }
+                }
+                fseek(fp, -(long)sizeof(struct sign), SEEK_CUR);
                 fwrite(&temp2, sizeof(struct sign), 1, fp);
+                *result = 1;
+
             }
             else{
+                printf("\033[31m");
                 printf("The gmail is not correct\n");
+                Sleep(2000);
             }
         }
-        else{
-            printf("The name is not correct\n");
-        }
     }
+    if(resultn == 0){
+        printf("\033[31m");
+        printf("The name is not correct\n");     
+        Sleep(2000);
+        }
 }
-void sign_in(FILE *fp, int result, char *nametmp) {
+
+void sign_in(FILE *fp, int *result) {
     struct sign temp, temp2;
+    printf("\033[32m");
     printf("Enter your name: ");//رنگی کردن را یادت نره
-    scanf("%s", temp.name);
+    //scanf("%s", temp.name);
+    printf("\033[0m");
+    fgets(temp.name, sizeof(temp.name), stdin);
+
+    temp.name[strcspn(temp.name, "\n")] = '\0';
+    printf("\033[32m");
     printf("Enter your password: ");
     int i = 0;
     char ch; 
+    printf("\033[0m");
     while (1) {
         ch = getch();  // بدون نشان دادن بر روی ص
 
         if (ch == 13) {  // کد اسبلی انتر است
             break;
         } 
-        
+        else if(ch == 8)// back space
+        {
+            if(i > 0)
+                i--;
+            printf("\b \b");// بازگشت به عقب و جایگزینی با فضای خالی    
+        }
         else {                                          // ذخیره کاراکتر در آرایه
             temp.password[i++] = ch;
             printf("*");                               // نمایش ستاره به‌جای رمز
@@ -122,90 +187,47 @@ void sign_in(FILE *fp, int result, char *nametmp) {
         {
             if(strcmp(temp2.password , temp.password) == 0)
             {
-                strcpy(nametmp, temp.name);//بعدش در یک فایل دگر به نام گیم میام و این نام را می گردیم پیدا شد می کنیم تا رکوردهاش را جلوش ثبت کنیم
+                strcpy(Name, temp.name);//بعدش در یک فایل دگر به نام گیم میام و این نام را می گردیم پیدا شد می کنیم تا رکوردهاش را جلوش ثبت کنیم
+                printf("\033[0m");
+                printf("your sign_in is successful");
+                Sleep(2000);
+                *result = 1;
+                return;
             }
             else{
-                result = 0;
-                printf("");
-                forgetpassword(fp);
+                *result = 0;
+                return;
+                
             }
         }
         else{
-            result = 0;
-            forgetpassword(fp);
+            continue;
         }
     }
+    return;
     //اگر که بولین ما برابر غلط بود بیا و یه خظا پرینت کن
     //
 }
 
-int filegame(FILE *fgame, char name[])
-{
-    struct infogame temp;
-    int result = 0;
-    fseek(fgame, 0, SEEK_SET);
-    while(fread(&temp, sizeof(struct infogame), 1, fgame) == 1)
-    {
-        if(strcmp(temp.name, name) == 0)
-        {
-            result = 1;
-        }
-    }
-    if(result == 1)
-    {
-        int n = ftell(fgame);
-        return n-sizeof(struct infogame);
-    }
-    else{
-        fseek(fgame, 0, SEEK_END);
-        strcpy(temp.name, name);
-        fwrite(&temp, sizeof(struct infogame), 1, fgame);
-    }
-}
-
-void showinfogame(char name[], FILE *fgame) {
-    struct infogame temp;
-
-    while (fread(&temp, sizeof(struct infogame), 1, fgame) == 1) {
-        if (strcmp(temp.name, name) == 0) {
-            struct game *pTmp = temp.pHead;
-            
-            if (pTmp == NULL) {
-                printf("You haven't history of this game.\n");
-                return;
-            } 
-
-            //  کشیدن خط بالا
-            printf("+--------+---------+-------+------+\n");
-            printf("| %-6s | %-7s | %-5s | %-4s |\n", "Game", "Victory", "Score", "Coin");//چپ چین کردن عناوین با علامت منفی اینگونه فضای خالی را در سمت راست قرار می دهد
-            printf("+--------+---------+-------+------+\n");
-
-            int i = 1;
-            while (pTmp != NULL) {
-                printf("| %-6d | %-7d | %-5d | %-4d |\n", i, pTmp->victory, pTmp->score, pTmp->coin);
-                pTmp = pTmp->pNext;
-                i++;
-            }
-
-            //  کشیدن خط پایین جدول
-            printf("+--------+---------+-------+------+\n");
-
-            return;  
-        }
-    }
-
-    printf("Game not found!\n"); 
-}
-void change_Data(FILE *fp)
+void change_Data(FILE *fp, FILE *fgame)
 {
     struct sign temp, temp2, temp3;
+    struct infogame tmp;
+    printf("\033[32m");
     printf("Enter your name: ");
-    scanf("%s", temp.name);
+    printf("\033[0m");
+    fgets(temp.name, sizeof(temp.name), stdin);
+
+    temp.name[strcspn(temp.name, "\n")] = '\0';
+    printf("\033[32m");
     printf("Enter your password: ");
+    printf("\033[0m");
     scanf("%s", temp.password);
+    getc(stdin);
     fseek(fp, 0, SEEK_SET);
     int resultn = 0;// if not find the name
     int result = fread(&temp2, sizeof(struct sign), 1, fp);
+    int result2 = fread(&tmp, sizeof(struct infogame), 1, fgame);
     while(result == 1)
     {
         if(strcmp(temp2.name, temp.name) == 0)
@@ -213,58 +235,207 @@ void change_Data(FILE *fp)
             resultn = 1;
             if(strcmp(temp2.password, temp.password) == 0)
             {
+                system("cls");
                 printf("Enter your new name: ");
-                scanf("%s", temp2.name);
+                printf("\033[0m");
+                fgets(temp2.name, sizeof(temp2.name), stdin);
+
+                temp2.name[strcspn(temp2.name, "\n")] = '\0';
+                
                 fseek(fp, 0, SEEK_SET);
 
-                while(fread(&temp2, sizeof(struct sign), 1, fp) == 1)
+                while(fread(&temp3, sizeof(struct sign), 1, fp) == 1)
                 {
                     if(strcmp(temp2.name, temp3.name) == 0)
                     {
+                        printf("\033[31m");
                         printf("This name is already exist\n");
+                        printf("\033[32m");
                         printf("Enter your new name: ");
-                        scanf("%s", temp2.name);
+                        printf("\033[0m");
+                        fgets(temp2.name, sizeof(temp.name), stdin);
+
+                        temp2.name[strcspn(temp.name, "\n")] = '\0';
+
                         fseek(fp, 0, SEEK_SET);
+                        continue;
                     }
 
                 }
             }   
             else{
+                printf("\033[31m");
                 printf("the password is not correct\n");
+                printf("\033[32m");
                 printf("Enter your password again: ");
+                printf("\033[0m");
                 scanf("%s", temp.password);
+                getc(stdin);
+
                 continue;
             }    
+            printf("\033[32m");
             printf("Enter your new password: ");
+            printf("\033[0m");
             scanf("%s", temp2.password);
-                
+            getc(stdin);
+
             int result3 = 0;
-        while(result3 != 1){                       //agian enter your password
-            printf("Enter your password again: ");
-            char password[100];
-            scanf("%s", password);
-            if(strcmp(temp2.password, password) == 0)
-            {
-                result = 1;
+            while(result3 != 1){ 
+                printf("\033[32m");                      //agian enter your password
+                printf("Enter your password again: ");
+                char password[100];
+                printf("\033[0m");
+                scanf("%s", password);
+                getc(stdin);
+
+                if(strcmp(temp2.password, password) == 0)
+                {
+                    result3 = 1;
+                }
+                else{
+                    printf("\033[31m");
+                    printf("The password is not correct\n");
+
+                }
             }
-        else{
-            printf("The password is not correct\n");
+            strcpy(Name, temp2.name); 
+            fseek(fp, -(long)sizeof(struct sign), SEEK_CUR);
+            fseek(fgame, -(long)sizeof(struct infogame), SEEK_CUR);
+            fwrite(&tmp, sizeof(struct infogame), 1, fgame);
+            fwrite(&temp2, sizeof(struct sign), 1, fp);
+            break;
         }
-    }
-        fseek(fp, -sizeof(struct sign), SEEK_CUR);
-        fwrite(&temp2, sizeof(struct sign), 1, fp);
-        break;
-    }
         
         else{
             result = fread(&temp2, sizeof(struct sign), 1, fp);
+            result2 = fread(&tmp, sizeof(struct infogame), 1, fgame);
+
         }    
     }
     
     if(resultn == 0)
     {
+        printf("\033[31m");
         printf("The name is not correct\n");
+        Sleep(2000);
         return;
     }
     return;
 }    
+
+int SIGN()
+{
+    int result = 1;
+    int resultin = 1;
+    FILE *fp = fopen("fname.bin", "r+b");
+    if(fp == NULL)
+    {
+        fp = fopen("fname.bin", "w+b");
+    }
+    FILE *fgame = fopen("fgame.bin", "r+b");
+    if(fgame == NULL)
+    {
+        fgame = fopen("fgame.bin", "w+b");
+    }
+    
+    while(1)
+    {
+        system("cls");
+        printf("\033[32m");
+        printf("if you want to sign in please inter 1\n");
+        printf("if you want to sign up please inter 2\n");
+        printf("if you want to change your information please inter 3\n");
+        printf("if you forget your password inter 4\n");
+        printf("if you want to back to the menu inter 5\n");
+        int n;
+        printf("please inter your number:");
+        printf("\033[0m");
+        scanf("%d", &n);
+        getc(stdin);
+        switch (n)
+        {
+            case 1:
+                if(resultultimate == 0){
+
+                    sign_in(fp, &resultin);
+                    if(resultin == 0)
+                    {
+                        printf("\033[31m");
+                        printf("your name or your password is wrong");
+                        Name[0] = '\0';//clear the value in the name string
+                        Sleep(2000);
+                    }
+                    
+                    else{
+                        
+                        resultultimate = 1;
+                        break;
+                    }
+                }
+                else{
+                    printf("\033[33m");
+                    printf("You now in your account");
+                    Sleep(2000);
+                    break;
+                }
+                break;
+            case 2:
+                if(resultultimate == 0){
+                    sign_up(fp, fgame);
+                    resultultimate = 1;
+                    
+                    break;
+                }
+                else{
+                    printf("\033[33m");
+                    printf("You now in your account");
+                    Sleep(2000);
+                    break; 
+                }  
+                break;     
+            case 3:
+                if(resultultimate == 1){
+                    change_Data(fp, fgame);
+                    
+                    break; 
+                }
+                else{
+                    printf("\033[31m");
+                    printf("you should first sign_up or sign_in");
+                    Sleep(2000);
+                    break; 
+                }
+                break;
+            case 4:
+                if(resultultimate == 0){
+
+                    forgetpassword(fp, &result);
+                    if(result == 0)
+                    {
+                        Name[0] = '\0';
+                        Sleep(2000);
+                        break; 
+                    } 
+                    else{
+                        
+                        resultultimate = 1;
+                        break; 
+                    }
+                }
+                else{
+                    
+                    break; 
+                }    
+                break;
+            case 5:
+                printf("\033[0m");
+                fclose(fp);
+                fclose(fgame);
+                return resultultimate;   
+            default:
+                break;       
+        }
+
+    }
+}

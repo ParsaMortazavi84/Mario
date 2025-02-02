@@ -32,6 +32,7 @@
             "type": "shell",
             "command": "gcc",
             "args": [
+                "-pthread",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.exe"

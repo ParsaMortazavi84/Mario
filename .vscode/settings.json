@@ -59,6 +59,12 @@
   "files.associations": {
     "string.h": "c",
     "random": "c",
-    "functional": "c"
-  }
+    "functional": "c",
+    "sign.h": "c",
+    "move3.h": "c",
+    "typeinfo": "c",
+    "temp.h": "c",
+    "common.h": "c"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }
